@@ -16,11 +16,35 @@ class Model{
         $this->response = new Response();
     }
 	
-    public function getAll(){
+    /*public function getAll(){
         try{
             $result = array();
 
             $stm = $this->db->prepare("SELECT * FROM $this->table WHERE user= 'LSAlumne'");
+            $stm->execute();
+
+            $this->response->setResponse(true);
+            $this->response->result = $stm->fetchAll();
+
+            return $this->response;
+        }
+        catch(Exception $e)
+        {
+            $this->response->setResponse(false, $e->getMessage());
+            return $this->response;
+        }
+    }*/
+	public function getAll($orden){
+        try{
+            $result = array();
+		if($orden == "titol"){
+		$stm = $this->db->prepare("SELECT * FROM $this->table WHERE user= 'LSAlumne' ORDER BY title ASC");
+		}else if($orden == "data"){
+		$stm = $this->db->prepare("SELECT * FROM $this->table WHERE user= 'LSAlumne' ORDER BY data DESC");
+		}else{
+			$stm = $this->db->prepare("SELECT * FROM $this->table WHERE user= 'LSAlumne'");
+		}
+            
             $stm->execute();
 
             $this->response->setResponse(true);
@@ -74,6 +98,65 @@ class Model{
             return $this->response;
         }
     }
+	
+	public function GetAllWithTag($tag)
+    {
+        try
+        {
+            $result = array();
+
+            $stm = $this->db->prepare("SELECT * FROM $this->table WHERE user= 'LSAlumne'and tag1 = '".$tag."' OR tag2 = '" .$tag."' OR tag3 = '" .$tag."' OR tag4 = '" .$tag."'");
+            $stm->execute(array($tag));
+
+            $this->response->setResponse(true);
+            $this->response->result = $stm->fetch();
+
+            return $this->response;
+        }
+        catch(Exception $e)
+        {
+            $this->response->setResponse(false, $e->getMessage());
+            return $this->response;
+        }
+    }
+	
+	public function flipPrivate($id)
+    {
+        try
+        {
+			$data[] = "";
+            $result = array();
+			$stm = $this->db->prepare("SELECT private FROM $this->table WHERE user= 'LSAlumne'and id = '".$id."'");
+			$stm->execute(array($id));
+			$this->response->setResponse(true);
+            $this->response->result = $stm->fetch();
+			$boll = 0;
+			while ($row = $this->response->result = $stm->fetch()) {
+				$data[] = $row;
+			}
+			$private = $data[0];
+			if ($private['private'] == 0) {
+			$boll =1;
+            $stm = $this->db->prepare("UPDATE FROM $this->table set private = '".$boll."' WHERE user= 'LSAlumne'and id = '".$id."'");
+            }
+			else{
+				$stm = $this->db->prepare("UPDATE FROM $this->table set private = '".$boll."' WHERE user= 'LSAlumne'and id = '".$id."'");
+			}
+			
+			
+
+            $this->response->setResponse(true);
+            $this->response->result = $stm->fetch();
+
+            return $this->response;
+        }
+        catch(Exception $e)
+        {
+            $this->response->setResponse(false, $e->getMessage());
+            return $this->response;
+        }
+    }
+	
     public function InsertOrUpdate($data)
     {
         try
@@ -147,6 +230,22 @@ class Model{
         {
             $stm = $this->db
                 ->prepare("DELETE FROM $this->table WHERE id = ?");
+
+            $stm->execute(array($id));
+
+            $this->response->setResponse(true);
+            return $this->response;
+        } catch (Exception $e)
+        {
+            $this->response->setResponse(false, $e->getMessage());
+        }
+    }
+	public function DeleteTagOnNote($id,$tag)
+    {
+        try
+        {
+            $stm = $this->db
+                ->prepare("DELETE ta FROM $this->table WHERE id = '".$id."'");
 
             $stm->execute(array($id));
 

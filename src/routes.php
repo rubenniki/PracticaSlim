@@ -40,6 +40,25 @@ $app->group('/api/', function () {
 		
     });
 	
+	$this->get('getAll/{orden}', function ($req, $res, $args) {
+        $model = new \app\models\model\Model();
+		$pass= explode("[", json_encode($model->getAll($args['orden'])));
+		$user=explode("]", $pass[1]);
+		if(empty($user[0])){
+			$args["code"]= "204";
+			$args["resp"]= "No notes found!";
+			$res=$res->withJson($args,300);
+			return $res;
+		}
+		$args["code"]= "200";
+		
+		$args["resp"]= $user[0];
+
+		$res=$res->withJson($args,200);
+		return $res;
+		
+    });
+	
 	$this->get('getPublic', function ($req, $res, $args) {
         $model = new \app\models\model\Model();
 		$pass= explode("[", json_encode($model->getPublic()));
@@ -79,6 +98,28 @@ $app->group('/api/', function () {
             
         
     });
+	
+	$this->get('getAllWithTag/{tag}', function ($req, $res, $args) {
+
+        $model = new \app\models\model\Model();
+		$pass= explode(":", json_encode($model->GetAllWithTag($args['tag'])));
+		$user=explode(",", $pass[1]);
+		if($user[0] == "false"){
+			$args["code"]= "204";
+			$args["resp"]= "No notes found";
+			$res=$res->withJson($args,200);
+			return $res;
+		}
+		$pass= explode("{", json_encode($model->GetAllWithTag($args['tag'])));
+		$user=explode("}", $pass[2]);
+		$args["code"]= "200";
+		$args["resp"]= $user[0];
+		$res=$res->withJson($args,200);
+		return $res;
+		
+            
+        
+    });
 
     $this->post('save', function ($req, $res) {
         $model = new \app\models\model\Model();
@@ -94,18 +135,22 @@ $app->group('/api/', function () {
             )
         );
     });
-
-    $this->post('delete/{id}', function ($req, $res, $args) {
+	
+	$this->post('flipPrivate/{id}', function ($req, $res, $args) {
         $model = new \app\models\model\Model();
 
         return $res
            ->withHeader('Content-type', 'application/json')
            ->getBody()
            ->write(
-            json_encode(
-                $model->Delete($args['id'])
-            )
-        );
+            json_encode($model->flipPrivate($args['id']))
+            );
+    });
+
+    $this->delete('delete/{id}', function ($req, $res, $args) {
+        $model = new \app\models\model\Model();
+		json_encode($model->Delete($args['id']));
+       return "se ha eliminado";
     });
 
 });
